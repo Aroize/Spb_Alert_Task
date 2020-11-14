@@ -6,8 +6,7 @@ REASON_DESCRIPTIONS = {}
 
 class FrontendClusterSender(WebSocketHandler):
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def initialize(self):
         Worker.frontend_sender = self
 
     def data_received(self, chunk):
@@ -18,7 +17,7 @@ class FrontendClusterSender(WebSocketHandler):
 
     @staticmethod
     def get_mapping():
-        return "/"
+        return r"/"
 
     def send(self, clusters):
         self.write_message({"method": "/showClusters", "data": clusters})

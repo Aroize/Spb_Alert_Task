@@ -19,8 +19,6 @@ EMERGENCY_THRESHOLD = 0.7
 
 class Worker:
 
-    frontend_sender = None
-
     queues = {i: (Lock(), deque()) for i in EVENT_IDS}
 
     @staticmethod
