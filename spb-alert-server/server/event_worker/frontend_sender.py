@@ -1,3 +1,4 @@
+import logging
 from tornado.websocket import WebSocketHandler
 from server.event_worker.worker import Worker
 
@@ -7,6 +8,7 @@ REASON_DESCRIPTIONS = {}
 class FrontendClusterSender(WebSocketHandler):
 
     def initialize(self):
+        logging.warning("frontend sender initialized")
         Worker.frontend_sender = self
 
     def data_received(self, chunk):
