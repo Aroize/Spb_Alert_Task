@@ -44,7 +44,7 @@ class Worker:
                 time.sleep(SLEEP_TIME)
                 self.handle_events()
             except Exception as e:
-                raise e
+                logging.warning(e)
 
     def handle_events(self):
         for queue in Worker.queues.values():

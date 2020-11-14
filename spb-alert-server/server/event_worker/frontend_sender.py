@@ -20,7 +20,7 @@ class FrontendClusterSender:
     def send(self, clusters):
         method = "/showClusters"
         url = self.base_url + method
-        requests.post(url, json=clusters)
+        requests.get(url, json=clusters)
 
     def send_emergency_reasons(self, event_type, lat, lon, reasons: dict):
         method = "/notifyEmergencyDescription"
@@ -33,4 +33,4 @@ class FrontendClusterSender:
             "lon": lon,
             "description": description
         }
-        requests.post(url, json=json_data)
+        requests.get(url, json=json_data)
