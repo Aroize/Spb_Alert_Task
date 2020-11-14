@@ -1,9 +1,14 @@
 from tornado.websocket import WebSocketHandler
+from server.event_worker.worker import Worker
 
 REASON_DESCRIPTIONS = {}
 
 
 class FrontendClusterSender(WebSocketHandler):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        Worker.frontend_sender = self
 
     def data_received(self, chunk):
         pass

@@ -20,6 +20,9 @@ EMERGENCY_THRESHOLD = 0.7
 
 
 class Worker:
+
+    frontend_sender = None
+
     queues = {i: (Lock(), deque()) for i in EVENT_IDS}
 
     @staticmethod
@@ -35,7 +38,6 @@ class Worker:
 
     def __init__(self):
         self.model_sender = ModelEventSender()
-        self.frontend_sender = FrontendClusterSender()
 
     def run(self):
         logging.warning("Worker is started")
@@ -71,7 +73,7 @@ class Worker:
 
         model_output = self.model_sender.send(events)
         clusters = self.create_clusters(model_output)
-        self.frontend_sender.send(clusters)
+        Worker.frontend_sender.send(clusters)
 
     def create_clusters(self, events):
         clusters = self.rearrange_cluster_events(events)
@@ -132,4 +134,4 @@ class Worker:
         return reasons
 
     def send_emergency_reasons(self, event_type, lat, lon, reasons):
-        self.frontend_sender.send_emergency_reasons(event_type, lat, lon, reasons)
+        Worker.frontend_sender.send_emergency_reasons(event_type, lat, lon, reasons)
