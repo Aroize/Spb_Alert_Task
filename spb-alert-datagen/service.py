@@ -44,8 +44,8 @@ def main():
 		try:
 			while True:
 				sleep_time = random.randint(0, 3)
-				row = next(row_gen)
 				time.sleep(sleep_time)
+				row = next(row_gen)
 				url = "http://localhost:8888/api.pushEvent"
 				event = {
 					"date": row[0],
@@ -54,7 +54,7 @@ def main():
 					"event": row[3]
 				}
 				logging.warning(event)
-				requests.post(url, event)
+				requests.post(url, json=event)
 		except Exception as e:
 			logging.warning(e)
 
