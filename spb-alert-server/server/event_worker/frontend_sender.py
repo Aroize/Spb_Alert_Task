@@ -1,30 +1,25 @@
-import logging
-import requests
+from tornado.websocket import WebSocketHandler
 
 REASON_DESCRIPTIONS = {}
 
 
-class FrontendClusterSender:
+class FrontendClusterSender(WebSocketHandler):
 
-    schema = "http"
-    host = "localhost"
-    port = 8891
+    def data_received(self, chunk):
+        pass
 
-    def __init__(self):
-        self.base_url = "{}://{}:{}".format(
-            FrontendClusterSender.schema,
-            FrontendClusterSender.host,
-            FrontendClusterSender.port
-        )
+    def on_message(self, message):
+        pass
+
+    @staticmethod
+    def get_mapping():
+        return "/"
 
     def send(self, clusters):
-        method = "/showClusters"
-        url = self.base_url + method
-        requests.post(url, json=clusters)
+        self.write_message({"method": "/showClusters", "data": clusters})
 
     def send_emergency_reasons(self, event_type, lat, lon, reasons: dict):
         method = "/notifyEmergencyDescription"
-        url = self.base_url + method
         reason = max(reasons.items(), key=lambda x: x[1])[0]
         description = REASON_DESCRIPTIONS.get(reason, "Unknown")
         json_data = {
@@ -33,4 +28,4 @@ class FrontendClusterSender:
             "lon": lon,
             "description": description
         }
-        requests.post(url, json=json_data)
+        self.write_message({"method": method, "data": json_data})

@@ -3,9 +3,11 @@ from tornado.web import Application
 from tornado.ioloop import IOLoop
 from server.event_worker.worker import Worker
 from server.event_worker.controllers import InternalAppendEvent
+from server.event_worker.frontend_sender import FrontendClusterSender
 
 controllers = [
-    InternalAppendEvent
+    InternalAppendEvent,
+    FrontendClusterSender
 ]
 
 
@@ -21,3 +23,5 @@ if __name__ == '__main__':
     thread = Thread(target=worker.run)
     thread.start()
     IOLoop.instance().start()
+
+# ws://localhost:8889/
