@@ -4,7 +4,7 @@ to_timestamp = lambda strdate: time.mktime(time.strptime(str(strdate), '%Y-%m-%d
 from flask import Flask, request, jsonify
 app = Flask(__name__)
 
-from models.models import ClusteringModel, CheckEmergencyModel
+from models.models import ClusteringModel, EmergencyModel
 from models.cdbscan import Event
 
 clustering_configs = {
@@ -18,18 +18,16 @@ is_emergency_configs = {
 }
 
 # Read and format data
-# dfs = {0: {'df': pd.read_excel('../../data/raw/Датасет3_Дтп.xlsx', 
-#                                index_col='Время регистрации')}}
-# for event_type in dfs.keys():
-#     df = dfs[event_type]['df']
-#     df['timestamp'] = list(map(to_timestamp, df['Время регистрации']))
-#     df['lat'] = df['Широта']
-#     df['lon'] = df['Долгота']
-#     df = df.drop('Время регистрации	Категория	Идентификатор Еас адреса	Идентификатор Еас здания	Широта	Долгота	Район'.split('\t'), axis=1)
-#     df.set_index('timestamp')
-#     dfs[event_type]['df'] = df
+dfs = {0: {'df': pd.read_excel('../data/raw/Датасет3_Дтп.xlsx')}}
+for event_type in dfs.keys():
+    df = dfs[event_type]['df']
+    df['timestamp'] = list(map(to_timestamp, df['Время регистрации']))
+    df['lat'] = df['Широта']
+    df['lon'] = df['Долгота']
+    df = df.drop('Время регистрации	Категория	Идентификатор Еас адреса	Идентификатор Еас здания	Широта	Долгота	Район'.split('\t'), axis=1)
+#     df = df.set_index('timestamp')
+    dfs[event_type]['df'] = df
     
-# print(dfs[0]['df'])
 
     
     
@@ -42,7 +40,7 @@ def parse_events(json_events):
     return events, events_type
 
 
-@app.route('/calc_clusters', methods=['GET'])
+@app.route('/processEvents', methods=['GET'])
 def calc_clusters():
     json_events = request.get_json()
     events, events_type = parse_events(json_events)
@@ -62,22 +60,43 @@ def calc_clusters():
     return jsonify(labled_events)
 
 
-@app.route('/is_cluster_emergency', methods=['GET'])
+@app.route('/isClusterEmergency', methods=['GET'])
 def check_emergency():
     cluster = request.get_json() # list of events
-    print(cluster)
     events, events_type = parse_events(cluster)
+    
+    # get df with all events until the latest of given
     max_ts = max(list(map(lambda ev: ev.time, events)))
-#     subdf = 
+    subdf = dfs[event_type]['df']
+    subdf = subdf[subdf.timestamp <= max_ts]
     
     config = is_emergency_configs[events_type]
-    model = CheckEmergencyModel(**config)
+    model = EmergencyModel(subdf, **config)
     
-    status = model(events)
-    return jsonify({'status': status})
+    prob = model.predict_is_emergency(events)
+    return jsonify({'prob': prob})
     
+    
+@app.route('/getClusterEmergencyReasons', methods=['GET'])
+def check_emergency1():
+    cluster = request.get_json() # list of events
+    events, events_type = parse_events(cluster)
+    
+    # get df with all events until the latest of given
+    max_ts = max(list(map(lambda ev: ev.time, events)))
+    subdf = dfs[event_type]['df']
+    subdf = subdf[subdf.timestamp <= max_ts]
+    
+    config = is_emergency_configs[events_type]
+    model = EmergencyModel(subdf, **config)
+    
+    reasons = model.predict_emergency_reasons(events)
+    return jsonify({'reasons': reasons})
+
+
     
 
 if __name__ == "__main__":
-    
+#     emergency_models = {0: {'model': EmergencyModel(dfs[0]['df'])},
+#                         1: {'model': EmergencyModel(dfs[1]['df'])}}
     app.run(host='0.0.0.0', port=5000)
