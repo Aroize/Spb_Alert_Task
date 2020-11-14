@@ -10,6 +10,8 @@ from server.event_worker.frontend_sender import FrontendClusterSender
 # TODO(): need to set some threshold from stat conclusion
 SLEEP_TIME = 5
 
+QUEUE_EVENT_TIME = 12 * 60 * 60
+
 # TODO(): move to config
 EVENT_IDS = {0, 1, 2, 3}
 
@@ -46,20 +48,25 @@ class Worker:
         for queue in Worker.queues.values():
             self.handle_queue(*queue)
 
-    """
-    {event, lat, lon, ts, c_id}
-    """
     def handle_queue(self, mutex: Lock, queue: deque):
         events = list()
         try:
             mutex.acquire()
-            # TODO(): need to handle ts to understand do we need to process the queue
-            while len(queue) != 0:
-                # TODO(): remove popping elements from queue
-                events.append(queue.popleft())
+            if len(queue) == 0:
+                return
+            last_event_timestamp = queue[0].timestamp
+            # Drop events which are out of queue split time
+            while len(queue) > 0:
+                event = queue[-1]
+                if last_event_timestamp - event.timestamp < QUEUE_EVENT_TIME:
+                    break
+                events.append(queue.pop())
+            # merge last events
+            for event in queue:
+                events.append(event)
         finally:
             mutex.release()
-        # queue is cleared, so we need no mutex now
+
         model_output = self.model_sender.send(events)
         clusters = self.create_clusters(model_output)
         self.frontend_sender.send(clusters)
@@ -84,6 +91,7 @@ class Worker:
         event_type = events[0]["event"]
         lat_mean = sum(map(lambda event: event["lat"], events))
         lon_mean = sum(map(lambda event: event["lon"], events))
+        # TODO(): change to stat applied
         event_size = random.randint(0, 2)
         return {
             "lat": lat_mean,
