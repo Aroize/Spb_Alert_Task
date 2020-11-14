@@ -1,10 +1,11 @@
+from threading import Thread
 from tornado.web import Application
 from tornado.ioloop import IOLoop
 from server.event_worker.worker import Worker
-import _thread
+from server.event_worker.controllers import TestHandler
 
 controllers = [
-
+    TestHandler
 ]
 
 
@@ -17,5 +18,6 @@ if __name__ == '__main__':
     app = create_application()
     app.listen(8889)
     worker = Worker()
-    _thread.start_new_thread(worker.run, ())
+    thread = Thread(target=worker.run)
+    thread.start()
     IOLoop.instance().start()
