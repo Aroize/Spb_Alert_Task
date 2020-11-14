@@ -44,7 +44,7 @@ class Worker:
                 time.sleep(SLEEP_TIME)
                 self.handle_events()
             except Exception as e:
-                logging.warning(e)
+                raise e
 
     def handle_events(self):
         for queue in Worker.queues.values():
@@ -54,7 +54,7 @@ class Worker:
         events = list()
         try:
             mutex.acquire()
-            if len(queue) == 0:
+            if len(queue) < 2:
                 return
             last_event_timestamp = queue[0].timestamp
             # Drop events which are out of queue split time
@@ -76,7 +76,7 @@ class Worker:
     def create_clusters(self, events):
         clusters = self.rearrange_cluster_events(events)
         collapsed_clusters = []
-        for c_id, events in clusters:
+        for c_id, events in clusters.items():
             if c_id == NO_CLUSTER_ID:
                 events = self.map_no_cluster(events)
                 collapsed_clusters.extend(events)
@@ -87,7 +87,7 @@ class Worker:
     def rearrange_cluster_events(self, events):
         clusters = {}
         for event in events:
-            c_id = event["c_id"]
+            c_id = event["cid"]
             if c_id not in clusters:
                 clusters[c_id] = list()
             clusters[c_id].append(event)
@@ -119,7 +119,7 @@ class Worker:
             "lat": lat_mean,
             "lon": lon_mean,
             "size": event_size,
-            "type": event_type
+            "event": event_type
         }
 
     def get_emergency_probability(self, cluster):

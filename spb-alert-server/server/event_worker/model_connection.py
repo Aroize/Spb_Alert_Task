@@ -5,7 +5,7 @@ class ModelEventSender:
 
     schema = "http"
     host = "localhost"
-    port = 8890
+    port = 5000
 
     def __init__(self):
         self.base_url = "{}://{}:{}".format(ModelEventSender.schema, ModelEventSender.host, ModelEventSender.port)
@@ -20,9 +20,7 @@ class ModelEventSender:
         }
 
     def prepare_events_to_send(self, events):
-        return {
-            "data": list(map(self.process_event, events))
-        }
+        return list(map(self.process_event, events))
 
     def send(self, events):
         method = "/processEvents"
