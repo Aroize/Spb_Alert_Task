@@ -39,7 +39,9 @@ class ApiPushEvent:
 
     @staticmethod
     def parse_coordinate(coord):
-        return float(coord.replace(",", "."))
+        if isinstance(coord, str):
+            return float(coord.replace(",", "."))
+        return float(coord)
 
     def __str__(self):
         return "ApiPushEvent\n[\n\tevent = {}\n\ttimestamp = {}\n\tlat = {}\n\tlon = {}\n]"\
