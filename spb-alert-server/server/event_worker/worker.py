@@ -1,10 +1,8 @@
 import time
 import logging
-import random
 from collections import deque
 from threading import Lock
 from server.event_worker.model_connection import ModelEventSender
-from server.event_worker.frontend_sender import FrontendClusterSender
 
 # TODO(): need to set some threshold from stat conclusion
 SLEEP_TIME = 5
