@@ -52,7 +52,7 @@ def calc_clusters():
     labled_events = []
     for event, label in events_labels:
         obj = {'lat': event.lat,
-               'lone': event.lon,
+               'lon': event.lon,
                'ts': event.time,
                'event': events_type,
                'cid': label}
