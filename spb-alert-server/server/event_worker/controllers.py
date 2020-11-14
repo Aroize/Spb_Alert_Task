@@ -3,7 +3,7 @@ from tornado.web import RequestHandler
 from server.event_worker.worker import Worker
 
 
-class TestHandler(RequestHandler):
+class InternalAppendEvent(RequestHandler):
 
     @staticmethod
     def get_mapping():

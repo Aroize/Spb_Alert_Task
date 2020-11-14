@@ -34,4 +34,4 @@ class ApiPushEventHandler(RequestHandler):
             "lat": event.lat,
             "lon": event.lon
         }
-        requests.post(url, json_event)
+        requests.post(url, json=json_event)

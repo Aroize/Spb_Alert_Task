@@ -2,10 +2,10 @@ from threading import Thread
 from tornado.web import Application
 from tornado.ioloop import IOLoop
 from server.event_worker.worker import Worker
-from server.event_worker.controllers import TestHandler
+from server.event_worker.controllers import InternalAppendEvent
 
 controllers = [
-    TestHandler
+    InternalAppendEvent
 ]
 
 

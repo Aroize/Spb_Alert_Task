@@ -28,6 +28,22 @@ class ModelEventSender:
         method = "/processEvents"
         url = self.base_url + method
         data = self.prepare_events_to_send(events)
-        response = requests.get(url, data)
+        response = requests.get(url, json=data)
         json_response = response.json()
         return json_response
+
+    def get_cluster_emergency(self, cluster):
+        method = "/isClusterEmergency"
+        url = self.base_url + method
+        response = requests.get(url, json=cluster)
+        json_response = response.json()
+        return json_response
+
+    def get_cluster_emergency_reasons(self, cluster):
+        method = "/getClusterEmergencyReasons"
+        url = self.base_url + method
+        response = requests.get(url, json=cluster)
+        json_response = response.json()
+        return json_response
+
+

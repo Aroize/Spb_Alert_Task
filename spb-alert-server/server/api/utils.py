@@ -39,8 +39,6 @@ class ApiPushEvent:
 
     @staticmethod
     def parse_coordinate(coord):
-        if isinstance(coord, str):
-            return float(coord.replace(",", "."))
         return float(coord)
 
     def __str__(self):
