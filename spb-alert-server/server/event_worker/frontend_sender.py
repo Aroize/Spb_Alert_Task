@@ -8,8 +8,13 @@ class FrontendClusterSender:
     port = 8891
 
     def __init__(self):
-        self.base_url = "{}://{}:{}".format(FrontendClusterSender.schema, FrontendClusterSender.host, FrontendClusterSender.port)
+        self.base_url = "{}://{}:{}".format(
+            FrontendClusterSender.schema,
+            FrontendClusterSender.host,
+            FrontendClusterSender.port
+        )
 
     def send(self, clusters):
         method = "/showClusters"
-        requests.post(method, {"data": clusters})
+        url = self.base_url + method
+        requests.post(url, {"data": clusters})
