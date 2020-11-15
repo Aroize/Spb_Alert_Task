@@ -1,4 +1,4 @@
-from .cdbscan import Event, ContinuosDBSCAN
+from .cdbscan import Event, ContinuosDBSCAN, ContinuosCluster
 
 
 class ClusteringModel(ContinuosDBSCAN):
@@ -54,8 +54,23 @@ class EmergencyModel():
                                                                  historical_clusters_in_local_area)))
         diff = curr_points / max(1, f_historical_local_avg_points_in_cluster)
         reasons['unusual_high_activity'] = {'perc': diff,
-                                            'importance': diff}
-#         print(reasons)
+                                            'importance': int(diff > 3.0)}
+
+        # unusual weather
+        week = 60*60*24*7
+        avg_ts = (max_ts + min_ts) / 2
+        temp_diff, pressure_diff, wetness_diff, visibility_diff = self._calc_weather_diffs(min_ts-week, min_ts, min_ts, max_ts)
+        reasons['unusual_temperature'] = {'perc': temp_diff,
+                                          'importance': int(temp_diff > 1.5)}
+        reasons['unusual_pressure'] = {'perc': pressure_diff,
+                                       'importance': int(pressure_diff > 1.2)}
+        reasons['unusual_wetness'] = {'perc': wetness_diff,
+                                      'importance': int(wetness_diff > 1.4)}
+        reasons['unusual_visibility'] = {'perc': visibility_diff,
+                                         'importance': int(visibility_diff > 1.25)}
+        
+        # unusual crashes
+        
         
         return reasons
     
@@ -65,13 +80,31 @@ class EmergencyModel():
         for (ts, lat, lon) in events_data:
             events.append(Event(lat, lon, ts))
         return events
+    
+    
+    def _calc_weather_diffs(self, ts_past_from, ts_past_to, ts_from, ts_to):
+        df = self.df.copy()
+        subdf = df[(df.timestamp > ts_past_from) & (df.timestamp < ts_past_to)]
+        past_means = subdf.mean()
+        
+        subdf = df[(df.timestamp > ts_from) & (df.timestamp < ts_to)]
+        curr_means = subdf.mean()
+        
+        diff = abs(curr_means - past_means) / past_means
+        temp_diff = diff['T'] or 1
+        pressure_diff = diff['P'] or 1
+        wetness_diff = diff['U'] or 1
+        visibility_diff = diff['VV'] or 1
+        
+        return temp_diff, pressure_diff, wetness_diff, visibility_diff
+        
         
     def _calc_local_area_clusters(self, lat, lon, eps):
         df = self.df.copy()
         
         df['dist'] = ((df.lat - lat)**2 + (df.lon - lon)**2)**0.5
         local_events = df[df.dist <= eps]
-        local_events = self._build_events(local_events.to_records())
+        local_events = self._build_events(local_events['timestamp lat lon'.split()].to_records(index=False))
         
         if len(local_events) < 2:
             return []
@@ -90,7 +123,7 @@ class EmergencyModel():
         df = self.df.copy()
         
         local_events = df[(df.timestamp <= max_ts) & (df.timestamp > min_ts)]
-        local_events = self._build_events(local_events.to_records())
+        local_events = self._build_events(local_events['timestamp lat lon'.split()].to_records(index=False))
         
         if len(local_events) < 2:
             return []

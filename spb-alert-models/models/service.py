@@ -18,14 +18,14 @@ is_emergency_configs = {
 }
 
 # Read and format data
-dfs = {0: {'df': pd.read_excel('../data/raw/Датасет3_Дтп.xlsx')}}
+dfs = {0: {'df': pd.read_excel('../data/raw/new_Dataset3_Dtp.xlsx')}}
 for event_type in dfs.keys():
     df = dfs[event_type]['df']
     df['timestamp'] = list(map(to_timestamp, df['Время регистрации']))
     df['lat'] = df['Широта']
     df['lon'] = df['Долгота']
-    df = df.drop('Время регистрации	Категория	Идентификатор Еас адреса	Идентификатор Еас здания	Широта	Долгота	Район'.split('\t'), axis=1)
-#     df = df.set_index('timestamp')
+    df = df['timestamp lat lon T P U VV'.split()]
+    df = df[df.isna().sum(axis=1) == 0]
     dfs[event_type]['df'] = df
     
 
