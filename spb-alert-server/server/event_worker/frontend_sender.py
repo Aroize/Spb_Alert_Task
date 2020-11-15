@@ -1,6 +1,11 @@
 import requests
 
-REASON_DESCRIPTIONS = {}
+REASON_DESCRIPTIONS = {
+    "unusual_temperature": "Аномальная температура воздуха",
+    "unusual_pressure": "Аномальное давление",
+    "unusual_wetness": "Аномальная влажность",
+    "unusual_visibility": "Аномальная видимость"
+}
 
 
 class FrontendClusterSender:
@@ -17,7 +22,7 @@ class FrontendClusterSender:
     def send(self, clusters):
         method = "/showClusters"
         url = self.base_url + method
-        requests.post(url, json=clusters)
+        requests.get(url, json=clusters)
 
     def send_emergency_reasons(self, event_type, lat, lon, reasons: dict):
         method = "/notifyEmergencyDescription"
