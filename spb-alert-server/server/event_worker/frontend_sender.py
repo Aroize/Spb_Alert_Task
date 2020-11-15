@@ -12,7 +12,7 @@ class FrontendClusterSender:
 
     def __init__(self):
         self.base_url = "{}://{}:{}".format(
-            "http", "localhost", 8889
+            "http", "localhost", 5022
         )
 
     @staticmethod

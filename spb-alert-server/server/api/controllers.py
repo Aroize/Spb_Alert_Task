@@ -8,7 +8,7 @@ class ApiPushEventHandler(RequestHandler):
 
     schema = "http"
     host = "localhost"
-    port = 5022
+    port = 8889
 
     @staticmethod
     def get_mapping():
