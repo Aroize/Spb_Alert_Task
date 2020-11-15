@@ -3,6 +3,7 @@ import logging
 from collections import deque
 from threading import Lock
 from server.event_worker.model_connection import ModelEventSender
+from server.event_worker.frontend_sender import FrontendClusterSender
 
 # TODO(): need to set some threshold from stat conclusion
 SLEEP_TIME = 5
@@ -34,6 +35,7 @@ class Worker:
 
     def __init__(self):
         self.model_sender = ModelEventSender()
+        self.frontend_sender = FrontendClusterSender()
 
     def run(self):
         logging.warning("Worker is started")
@@ -69,7 +71,7 @@ class Worker:
 
         model_output = self.model_sender.send(events)
         clusters = self.create_clusters(model_output)
-        Worker.frontend_sender.send(clusters)
+        self.frontend_sender.send(clusters)
 
     def create_clusters(self, events):
         clusters = self.rearrange_cluster_events(events)
@@ -130,4 +132,4 @@ class Worker:
         return reasons
 
     def send_emergency_reasons(self, event_type, lat, lon, reasons):
-        Worker.frontend_sender.send_emergency_reasons(event_type, lat, lon, reasons)
+        self.frontend_sender.send_emergency_reasons(event_type, lat, lon, reasons)
